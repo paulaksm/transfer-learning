@@ -1,9 +1,9 @@
-from keras.applications.vgg16 import VGG16
-from keras.preprocessing import image
-from keras.applications.vgg16 import preprocess_input
-from keras.models import Model
 import numpy as np
 import PIL
+from keras.models import Model
+from keras.preprocessing import image
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
 from util import load_npy, save_npy, reshape_npy
 
 
