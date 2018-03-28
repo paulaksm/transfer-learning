@@ -1,3 +1,3 @@
 # Transfer Learning 
 
-### Images to embeddings using VGG-16
+### Images embeddings using VGG-16
