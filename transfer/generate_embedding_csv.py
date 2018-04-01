@@ -55,14 +55,24 @@ def main():
                         type=str, help='npy data file')  
     parser.add_argument('npy_labels',
                         type=str, help='npy label file') 
-    #parser.add_argument('csv_file',
-    #                    type=str, nargs='?', default=None, help='csv file with first column: label and second column: image path') 
     parser.add_argument('csv_folder_path',
                         type=str, 
                         default=os.getcwd(),
                         help='path to csv files to be saved (default= current working directory)')
     parser.add_argument('csv_name',
                         type=str, nargs='?', default="transferfeature", help='name of new csv file (default="transferfeature")')  # noqa
+    model_list = """trained_models: VGG16,
+                                    VGG19,
+                                    ResNet50,
+                                    MobileNet,
+                                    Xception,
+                                    InceptionV3,
+                                    InceptionResNetV2"""
+    parser.add_argument("-tm",
+                        "--trained_model",
+                       type=str, 
+                       default='VGG16', 
+                       help=model_list + "(default=VGG16)") 
     parser.add_argument("-he",
                         "--image_height",
                         type=int,
@@ -80,7 +90,7 @@ def main():
                         help="original image channels (default=3)")
 
     user_args = parser.parse_args()
-    default_model = TransferModel(model='VGG16')
+    default_model = TransferModel(model=user_args.trained_model)
     data, labels = dataset_npy_transferlearning(user_args.npy_data,
                                                 user_args.npy_labels,
                                                 user_args.image_height,

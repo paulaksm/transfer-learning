@@ -26,6 +26,9 @@ class TransferModel(object):
         if model == 'InceptionV3':
             self.model = self._set_inception_v3()
 
+        if model == 'InceptionResNetV2':
+            self.model = self._set_inception_resnetv2()
+
     def get_embedding(self, img):
         x = image.img_to_array(img)
         x = np.expand_dims(x, axis=0)
@@ -73,6 +76,13 @@ class TransferModel(object):
         self.preprocess_type = pretrained.inception_v3
         self.input_shape = (299,299)
         self.model = pretrained.inception_v3.InceptionV3(weights=self._weights, include_top=True)
+        # print(self.model.summary())
+        return self._get_last_layer()
+
+    def _set_inception_resnetv2():
+        self.preprocess_type = inception_resnet_v2
+        self.input_shape = (299,299)
+        self.model = pretrained.inception_resnet_v2.InceptionResNetV2(weights=self._weights, include_top=True)
         # print(self.model.summary())
         return self._get_last_layer()
 
