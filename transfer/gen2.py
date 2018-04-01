@@ -1,11 +1,12 @@
 import numpy as np
+from keras.preprocessing import image
 import os
 import PIL
 import csv
 import argparse
 from util import load_npy, save_csv
-import TransferModel
-
+from TransferModel import TransferModel
+from progress.bar import Bar
 
 def dataset_csv_transferlearning(csv_file):
     with open(csv_file, 'rb') as source:
@@ -29,12 +30,15 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
     data, labels = load_npy(original_data_path, original_labels_path)
     shape = (height, width, channels)
     new_data = []
+    bar = Bar('Generating embeddings', max=len(labels))
     for img_array in data:
         data_orig = img_array.reshape(shape)
         img = image.array_to_img(data_orig, data_format='channels_last')
         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
         data_features = model.get_embedding(img)
         new_data.append(data_features)
+        bar.next()
+    bar.finish()
     data = np.array(new_data)
     return data, labels
 
@@ -47,10 +51,10 @@ def main():
     
     parser.add_argument('npy_data',
                         type=str, help='npy data file')  
-    parser.add_argument('npy_label',
+    parser.add_argument('npy_labels',
                         type=str, help='npy label file') 
-    parser.add_argument('csv_file',
-                        type=str, nargs='?', default=None, help='csv file with first column: label and second column: image path') 
+    #parser.add_argument('csv_file',
+    #                    type=str, nargs='?', default=None, help='csv file with first column: label and second column: image path') 
     parser.add_argument('csv_folder_path',
                         type=str, 
                         default=os.getcwd(),
@@ -75,12 +79,12 @@ def main():
 
     user_args = parser.parse_args()
     default_model = TransferModel(model='VGG16')
-    data, labels = dataset_npy_transferlearning(user_args.original_data_path,
-                                                user_args.original_labels_path,
+    data, labels = dataset_npy_transferlearning(user_args.npy_data,
+                                                user_args.npy_labels,
                                                 user_args.image_height,
                                                 user_args.image_width,
                                                 user_args.image_channels,
-                                                model)
+                                                default_model)
     save_csv(user_args.csv_name,
              user_args.csv_folder_path,
              data,

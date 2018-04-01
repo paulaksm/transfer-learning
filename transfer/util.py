@@ -16,6 +16,6 @@ def save_npy(name, folder_path, data, labels):
 
 def save_csv(name, folder_path, data, labels):
     full_path = os.path.join(folder_path, '{}.csv'.format(name))
-    concat_data_label = np.concatenate((labels, data), axix=1)
+    concat_data_label = np.concatenate((labels, data), axis=1)
     np.savetxt(full_path, concat_data_label, delimiter=",")
         
