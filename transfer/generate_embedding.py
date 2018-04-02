@@ -9,16 +9,19 @@ from TransferModel import TransferModel
 from progress.bar import Bar
 
 def dataset_csv_transferlearning(csv_file, model):
-    with open(csv_file, 'rb') as source:
+    with open(csv_file, 'r') as source:
         all_content = csv.reader(source)
         dataset = list(all_content)
     all_images = []
     all_labels = []
+    bar = Bar('Generating embeddings', max=len(dataset))
     for row in dataset:
         all_labels.append(row[0])
         img = image.load_img(row[1], target_size=model.input_shape)
         data_features = model.get_embedding(img)
         all_images.append(data_features)
+        bar.next()
+    bar.finish()
     data = np.array(all_images)
     all_labels = all_labels.reshape((all_labels.shape[0], 1))
     labels = np.array(all_labels)
