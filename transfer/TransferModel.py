@@ -79,8 +79,8 @@ class TransferModel(object):
         # print(self.model.summary())
         return self._get_last_layer()
 
-    def _set_inception_resnetv2():
-        self.preprocess_type = inception_resnet_v2
+    def _set_inception_resnetv2(self):
+        self.preprocess_type = pretrained.inception_resnet_v2
         self.input_shape = (299,299)
         self.model = pretrained.inception_resnet_v2.InceptionResNetV2(weights=self._weights, include_top=True)
         # print(self.model.summary())
