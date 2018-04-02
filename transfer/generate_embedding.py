@@ -1,25 +1,24 @@
 import numpy as np
-from keras.preprocessing import image
 import os
 import PIL
 import csv
 import argparse
+from keras.preprocessing import image
 from util import load_npy, save_csv, save_npy
 from TransferModel import TransferModel
 from progress.bar import Bar
 
-def dataset_csv_transferlearning(csv_file):
+def dataset_csv_transferlearning(csv_file, model):
     with open(csv_file, 'rb') as source:
         all_content = csv.reader(source)
         dataset = list(all_content)
     all_images = []
     all_labels = []
     for row in dataset:
-        all_labels.append(row[1])
-        img = image.load_img(row[0], target_size=model.input_shape)
+        all_labels.append(row[0])
+        img = image.load_img(row[1], target_size=model.input_shape)
         data_features = model.get_embedding(img)
         all_images.append(data_features)
-
     data = np.array(all_images)
     all_labels = all_labels.reshape((all_labels.shape[0], 1))
     labels = np.array(all_labels)
@@ -46,20 +45,32 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
 
 def main():
     """
-    Script to generate csv with image embeddings using pre-trained models given .npy files (data and labels)
+    Script to generate csv with image embeddings using pre-trained models given .npy files (data and labels) or a 
+    csv file containing first column: <img_labels>, second column: <path_to_images>
     """
     description = "Generate and save image embeddings using pre-trained models"
     parser = argparse.ArgumentParser(description=description)
+
+    parser.add_argument('-csv',
+                        '--csv_file',
+                        default=None,
+                        type=str, help='csv file (default=None)')
     
-    parser.add_argument('npy_data',
-                        type=str, help='npy data file')  
-    parser.add_argument('npy_labels',
-                        type=str, help='npy label file') 
-    parser.add_argument('save_folder_path',
+    parser.add_argument('-data',
+                        '--npy_data',
+                        default=None,
+                        type=str, help='npy data file (default=None)')  
+    parser.add_argument('-labels',
+                        '--npy_labels',
+                        default=None,
+                        type=str, help='npy label file (default=None)') 
+    parser.add_argument('-dir',
+                        '--save_folder_path',
                         type=str, 
                         default=os.getcwd(),
                         help='path to csv files to be saved (default= current working directory)')
-    parser.add_argument('save_name',
+    parser.add_argument('-n',
+                        '--save_name',
                         type=str, nargs='?', 
                         default="transferfeature", 
                         help='name of new csv or npy file(s) (default="transferfeature")')  
@@ -75,7 +86,7 @@ def main():
                        type=str, 
                        default='VGG16', 
                        help=model_list + "(default=VGG16)") 
-    parser.add_argument("-csv",
+    parser.add_argument("-to-csv",
                         "--save_csv",
                        action="store_true", 
                        default=False, 
@@ -103,23 +114,30 @@ def main():
 
     user_args = parser.parse_args()
 
+    err_input_msg = "Please provide an input file, if .npy please provide a file for data and another for labels"
+    assert user_args.csv_file is not None or ((user_args.npy_data is not None) and (user_args.npy_labels is not None)), err_input_msg
+
     model = TransferModel(model=user_args.trained_model, weights=user_args.nn_weights)
-    data, labels = dataset_npy_transferlearning(user_args.npy_data,
-                                                user_args.npy_labels,
-                                                user_args.image_height,
-                                                user_args.image_width,
-                                                user_args.image_channels,
-                                                model)
+    
+    if (user_args.csv_file is not None):
+        data, labels = dataset_csv_transferlearning(user_args.csv_file, model)
+    else:
+        data, labels = dataset_npy_transferlearning(user_args.npy_data,
+                                                    user_args.npy_labels,
+                                                    user_args.image_height,
+                                                    user_args.image_width,
+                                                    user_args.image_channels,
+                                                    model)
     if (user_args.save_csv):
         save_csv(user_args.save_name,
                  user_args.save_folder_path,
                  data,
                  labels)
     else:
-        save_npy(user_args.npy_name,
-             user_args.npy_folder_path,
-             data,
-             labels)
+        save_npy(user_args.save_name,
+                 user_args.save_folder_path,
+                 data,
+                 labels)
 
 if __name__ == '__main__':
     main()
