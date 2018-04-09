@@ -37,16 +37,16 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
         data_orig = img_array.reshape(shape)
         img = image.array_to_img(data_orig, data_format='channels_last')
         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
-        x = image.img_to_array(img)
-        x = np.expand_dims(x, axis=0)
-        x = self.preprocess_type.preprocess_input(x)
+        img = model.preprocess_input(img)
         if new_data is None:
-            new_data = np.array([], dtype=data[0].dtype).reshape(0, x.shape[1])
-        new_data = np.concatenate((new_data, x), axis=0)
+            new_data = np.array([], dtype=data[0].dtype).reshape((0,) + img.shape[1:]) # (0, img.shape[1])
+            #new_data = np.empty(img.shape, dtype=img.dtype)
+        new_data = np.concatenate((new_data, img), axis=0)
+        #print(new_data.shape)
         bar.next()
     bar.finish()
-
     emb_data = model.get_embedding_batch(new_data)
+    print(new_data.shape, len(new_data), len(labels), emb_data[0].shape)
     labels = labels.reshape((labels.shape[0], 1))
     return emb_data, labels
 

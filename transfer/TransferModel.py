@@ -39,7 +39,13 @@ class TransferModel(object):
     def get_embedding_batch(self, input_vector):
         feature_vector = self.model.predict(input_vector, batch_size=64, verbose=1)
         return feature_vector
-
+    
+    def preprocess_input(self, img):
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = self.preprocess_type.preprocess_input(x)
+        return x   
+ 
     def _set_vgg16(self):
         self.preprocess_type = pretrained.vgg16
         self.input_shape = (224,224)
