@@ -11,6 +11,7 @@ def save_npy(name, folder_path, data, labels):
     label_name = "{}_labels.npy".format(name)
     data_path = os.path.join(folder_path, data_name)
     labels_path = os.path.join(folder_path, label_name)
+    print('Data shape {}, Labels shape {}'.format(data.shape, labels.shape))
     np.save(data_path, data)
     np.save(labels_path, labels)
 

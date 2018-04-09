@@ -8,6 +8,7 @@ class TransferModel(object):
 
     def __init__(self, model='VGG16', weights='imagenet'):
         self._weights = weights
+        self.model_name = model
         if model == 'VGG16':
             self.model = self._set_vgg16() 
 

@@ -7,6 +7,7 @@ from keras.preprocessing import image
 from util import load_npy, save_csv, save_npy
 from TransferModel import TransferModel
 from progress.bar import Bar
+from progress.spinner import Spinner
 
 def dataset_csv_transferlearning(csv_file, model):
     with open(csv_file, 'r') as source:
@@ -39,14 +40,12 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
         img = model.preprocess_input(img)
         if new_data is None:
-            new_data = np.array([], dtype=data[0].dtype).reshape((0,) + img.shape[1:]) # (0, img.shape[1])
-            #new_data = np.empty(img.shape, dtype=img.dtype)
+            new_data = np.array([], dtype=data[0].dtype).reshape((0,) + img.shape[1:]) 
         new_data = np.concatenate((new_data, img), axis=0)
-        #print(new_data.shape)
         bar.next()
     bar.finish()
+    print("Generating embeddings using {} model".format(model.model_name))
     emb_data = model.get_embedding_batch(new_data)
-    print(new_data.shape, len(new_data), len(labels), emb_data[0].shape)
     labels = labels.reshape((labels.shape[0], 1))
     return emb_data, labels
 
