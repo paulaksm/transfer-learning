@@ -36,6 +36,10 @@ class TransferModel(object):
         feature_vector = self.model.predict(x)
         return feature_vector 
 
+    def get_embedding_batch(self, input_vector):
+        feature_vector = self.model.predict(input_vector, batch_size=64, verbose=1)
+        return feature_vector
+
     def _set_vgg16(self):
         self.preprocess_type = pretrained.vgg16
         self.input_shape = (224,224)

@@ -32,19 +32,41 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
     data, labels = load_npy(original_data_path, original_labels_path)
     shape = (height, width, channels)
     new_data = None
-    bar = Bar('Generating embeddings', max=len(labels))
+    bar = Bar('Preprocessing dataset', max=len(labels))
     for img_array in data:
         data_orig = img_array.reshape(shape)
         img = image.array_to_img(data_orig, data_format='channels_last')
         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
-        data_features = model.get_embedding(img)
+        x = image.img_to_array(img)
+        x = np.expand_dims(x, axis=0)
+        x = self.preprocess_type.preprocess_input(x)
         if new_data is None:
-            new_data = np.array([], dtype=data[0].dtype).reshape(0, data_features.shape[1])
-        new_data = np.concatenate((new_data, data_features), axis=0)
+            new_data = np.array([], dtype=data[0].dtype).reshape(0, x.shape[1])
+        new_data = np.concatenate((new_data, x), axis=0)
         bar.next()
     bar.finish()
+
+    emb_data = model.get_embedding_batch(new_data)
     labels = labels.reshape((labels.shape[0], 1))
-    return new_data, labels
+    return emb_data, labels
+
+# def dataset_npy_transferlearning(original_data_path, original_labels_path, height, width, channels, model):
+#     data, labels = load_npy(original_data_path, original_labels_path)
+#     shape = (height, width, channels)
+#     new_data = None
+#     bar = Bar('Generating embeddings', max=len(labels))
+#     for img_array in data:
+#         data_orig = img_array.reshape(shape)
+#         img = image.array_to_img(data_orig, data_format='channels_last')
+#         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
+#         data_features = model.get_embedding(img)
+#         if new_data is None:
+#             new_data = np.array([], dtype=data[0].dtype).reshape(0, data_features.shape[1])
+#         new_data = np.concatenate((new_data, data_features), axis=0)
+#         bar.next()
+#     bar.finish()
+#     labels = labels.reshape((labels.shape[0], 1))
+#     return new_data, labels
 
 def main():
     """
