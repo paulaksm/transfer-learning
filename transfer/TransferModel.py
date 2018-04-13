@@ -38,7 +38,7 @@ class TransferModel(object):
         return feature_vector 
 
     def get_embedding_batch(self, input_vector):
-        feature_vector = self.model.predict(input_vector, batch_size=64, verbose=1)
+        feature_vector = self.model.predict(input_vector, batch_size=32, verbose=1)
         return feature_vector
     
     def preprocess_input(self, img):

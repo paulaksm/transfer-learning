@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import os
 
 def load_npy(data_path, labels_path):
@@ -18,6 +19,6 @@ def save_npy(name, folder_path, data, labels):
 def save_csv(name, folder_path, data, labels):
     full_path = os.path.join(folder_path, '{}.csv'.format(name))
     print('Data shape {}, Labels shape {}'.format(data.shape, labels.shape))
-    concat_data_label = np.concatenate((labels, data), axis=1)
-    np.savetxt(full_path, concat_data_label, delimiter=",")
-        
+    data_label = np.column_stack((labels,data))
+    df = pd.DataFrame(data_label)
+    df.to_csv(full_path, index=None)  
