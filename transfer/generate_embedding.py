@@ -7,7 +7,6 @@ from keras.preprocessing import image
 from util import load_npy, save_csv, save_npy
 from TransferModel import TransferModel
 from progress.bar import Bar
-from progress.spinner import Spinner
 
 def dataset_csv_transferlearning(csv_file, model):
     with open(csv_file, 'r') as source:
@@ -30,7 +29,29 @@ def dataset_csv_transferlearning(csv_file, model):
     print('Data type {}, Labels type {}'.format(data.dtype, labels.dtype))
     return data, labels
 
-def dataset_npy_transferlearning(original_data_path, original_labels_path, height, width, channels, model):
+def dataset_csv_transferlearning_batch(csv_file, model, batch_size=8):
+    with open(csv_file, 'r') as source:
+        all_content = csv.reader(source)
+        dataset = list(all_content)
+    data = None
+    all_labels = []
+    bar = Bar('Generating embeddings', max=len(dataset))
+    for row in dataset:
+        all_labels.append(row[0])
+        img = image.load_img(row[1], target_size=model.input_shape)
+        img = model.preprocess_input(img)
+        if data is None:
+            data = np.array([]).reshape((0,) + img.shape[1:]) 
+        data = np.concatenate((data, img), axis=0)
+        bar.next()
+    bar.finish()
+    print("Generating embeddings using {} model".format(model.model_name))
+    data = model.get_embedding_batch(data, batch_size=batch_size)
+    labels = np.array(all_labels)
+    labels = labels.reshape((labels.shape[0], 1))
+    return data, labels
+
+def dataset_npy_transferlearning_batch(original_data_path, original_labels_path, height, width, channels, model, batch_size=8):
     data, labels = load_npy(original_data_path, original_labels_path)
     shape = (height, width, channels)
     new_data = None
@@ -46,27 +67,27 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
         bar.next()
     bar.finish()
     print("Generating embeddings using {} model".format(model.model_name))
-    emb_data = model.get_embedding_batch(new_data)
+    data = model.get_embedding_batch(new_data, batch_size=batch_size)
     labels = labels.reshape((labels.shape[0], 1))
-    return emb_data, labels
+    return data, labels
 
-# def dataset_npy_transferlearning(original_data_path, original_labels_path, height, width, channels, model):
-#     data, labels = load_npy(original_data_path, original_labels_path)
-#     shape = (height, width, channels)
-#     new_data = None
-#     bar = Bar('Generating embeddings', max=len(labels))
-#     for img_array in data:
-#         data_orig = img_array.reshape(shape)
-#         img = image.array_to_img(data_orig, data_format='channels_last')
-#         img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
-#         data_features = model.get_embedding(img)
-#         if new_data is None:
-#             new_data = np.array([], dtype=data[0].dtype).reshape(0, data_features.shape[1])
-#         new_data = np.concatenate((new_data, data_features), axis=0)
-#         bar.next()
-#     bar.finish()
-#     labels = labels.reshape((labels.shape[0], 1))
-#     return new_data, labels
+def dataset_npy_transferlearning(original_data_path, original_labels_path, height, width, channels, model):
+    data, labels = load_npy(original_data_path, original_labels_path)
+    shape = (height, width, channels)
+    new_data = None
+    bar = Bar('Generating embeddings', max=len(labels))
+    for img_array in data:
+        data_orig = img_array.reshape(shape)
+        img = image.array_to_img(data_orig, data_format='channels_last')
+        img = img.resize(model.input_shape, resample=PIL.Image.NEAREST)
+        data_features = model.get_embedding(img)
+        if new_data is None:
+            new_data = np.array([], dtype=data[0].dtype).reshape(0, data_features.shape[1])
+        new_data = np.concatenate((new_data, data_features), axis=0)
+        bar.next()
+    bar.finish()
+    labels = labels.reshape((labels.shape[0], 1))
+    return new_data, labels
 
 def main():
     """
@@ -79,8 +100,7 @@ def main():
     parser.add_argument('-csv',
                         '--csv_file',
                         default=None,
-                        type=str, help='csv file (default=None)')
-    
+                        type=str, help='csv file (default=None)')   
     parser.add_argument('-data',
                         '--npy_data',
                         default=None,
@@ -136,6 +156,11 @@ def main():
                         type=str,
                         default='imagenet',
                         help="load model with trained weights; None to not load model with pre-trained weights (default=imagenet)")
+    parser.add_argument("-b",
+                        "--batch_size",
+                        type=int,
+                        default=1,
+                        help="run predictions on batch of given size (8, 16, 32, 64...). If default, images will be passed tot the model as they are preprocessed (default=1)")
 
     user_args = parser.parse_args()
 
@@ -143,16 +168,31 @@ def main():
     assert user_args.csv_file is not None or ((user_args.npy_data is not None) and (user_args.npy_labels is not None)), err_input_msg
 
     model = TransferModel(model=user_args.trained_model, weights=user_args.nn_weights)
-    
-    if (user_args.csv_file is not None):
-        data, labels = dataset_csv_transferlearning(user_args.csv_file, model)
-    else:
-        data, labels = dataset_npy_transferlearning(user_args.npy_data,
-                                                    user_args.npy_labels,
-                                                    user_args.image_height,
-                                                    user_args.image_width,
-                                                    user_args.image_channels,
-                                                    model)
+    # que nojo de codigo...favor refatorar, paulaksm do futuro #
+    if (user_args.batch_size > 1):
+        if (user_args.csv_file is not None):
+            data, labels = dataset_csv_transferlearning_batch(user_args.csv_file, 
+                                                              model,
+                                                              batch_size=user_args.batch_size)
+        else:
+            data, labels = dataset_npy_transferlearning_batch(user_args.npy_data,
+                                                              user_args.npy_labels,
+                                                              user_args.image_height,
+                                                              user_args.image_width,
+                                                              user_args.image_channels,
+                                                              model,
+                                                              batch_size=user_args.batch_size)
+    else:    
+        if (user_args.csv_file is not None):
+            data, labels = dataset_csv_transferlearning(user_args.csv_file, 
+                                                        model)
+        else:
+            data, labels = dataset_npy_transferlearning(user_args.npy_data,
+                                                        user_args.npy_labels,
+                                                        user_args.image_height,
+                                                        user_args.image_width,
+                                                        user_args.image_channels,
+                                                        model)
     if (user_args.save_csv):
         save_csv(user_args.save_name,
                  user_args.save_folder_path,

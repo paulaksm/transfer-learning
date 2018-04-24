@@ -23,5 +23,4 @@ def save_csv(name, folder_path, data, labels):
     df = pd.DataFrame(data_label)
     col_names = [ "n{}".format(i) for i in range(data.shape[1]) ] # nqa
     col_names = ["Class"] + col_names                             # nqa
-
     df.to_csv(full_path, index=None, header=col_names)  

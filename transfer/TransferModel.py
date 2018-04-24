@@ -37,15 +37,15 @@ class TransferModel(object):
         feature_vector = self.model.predict(x)
         return feature_vector 
 
-    def get_embedding_batch(self, input_vector):
-        feature_vector = self.model.predict(input_vector, batch_size=32, verbose=1)
+    def get_embedding_batch(self, input_vector, batch_size=32):
+        feature_vector = self.model.predict(input_vector, batch_size=batch_size, verbose=1)
         return feature_vector
     
     def preprocess_input(self, img):
-        x = image.img_to_array(img)
-        x = np.expand_dims(x, axis=0)
-        x = self.preprocess_type.preprocess_input(x)
-        return x   
+        img = image.img_to_array(img)
+        img = np.expand_dims(img, axis=0)
+        img = self.preprocess_type.preprocess_input(img)
+        return img   
  
     def _set_vgg16(self):
         self.preprocess_type = pretrained.vgg16
