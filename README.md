@@ -178,7 +178,7 @@ Confusion matrix:
 ![confusion matrix](readme-images/confusion-matrix.png)
 
 
-__Important__ is interesting noticing that even though Orange Image Analytics add-on doesn't support MobileNet for image embedding is possible to train machine learning models on this data using this method.
+__IMPORTANT__ is interesting noticing that even though Orange Image Analytics add-on doesn't support MobileNet for image embedding is possible to train machine learning models on this data using this method.
 
 ## Built with 
 * Keras
