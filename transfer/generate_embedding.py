@@ -155,7 +155,7 @@ def main():
                         "--nn_weights",
                         type=str,
                         default='imagenet',
-                        help="load model with trained weights; None to not load model with pre-trained weights (default=imagenet)")
+                        help="None to load model without pre-trained weights (default=imagenet)")
     parser.add_argument("-b",
                         "--batch_size",
                         type=int,
