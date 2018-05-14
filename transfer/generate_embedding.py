@@ -35,7 +35,7 @@ def dataset_csv_transferlearning_batch(csv_file, model, batch_size=8):
         dataset = list(all_content)
     data = None
     all_labels = []
-    bar = Bar('Generating embeddings', max=len(dataset))
+    bar = Bar('Preprocessing dataset', max=len(dataset))
     for row in dataset:
         all_labels.append(row[0])
         img = image.load_img(row[1], target_size=model.input_shape)
@@ -91,7 +91,7 @@ def dataset_npy_transferlearning(original_data_path, original_labels_path, heigh
 
 def main():
     """
-    Script to generate csv with image embeddings using pre-trained models given .npy files (data and labels) or a 
+    Script to generate csv or npy with image embeddings using pre-trained models given .npy files (data and labels) or a 
     csv file containing first column: <img_labels>, second column: <path_to_images>
     """
     description = "Generate and save image embeddings using pre-trained models"
@@ -160,7 +160,7 @@ def main():
                         "--batch_size",
                         type=int,
                         default=1,
-                        help="run predictions on batch of given size (8, 16, 32, 64...). If default, images will be passed tot the model as they are preprocessed (default=1)")
+                        help="run predictions on batch of given size (8, 16, 32, 64...). If default, images will be passed to the model as they are preprocessed (default=1)")
 
     user_args = parser.parse_args()
 
