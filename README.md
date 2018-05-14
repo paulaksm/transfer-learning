@@ -164,6 +164,7 @@ In Orange canvas is possible to load this file with `File` widget and build the 
 ![orange workflow](readme-images/tl-workflow.png)
 
 After loading the data is mandatory to tell Orange which feature is the target, as follows:
+
 ![dataset info](readme-images/dataset-info.png)
 
 When training and evaluation process are finished, is possible to chech the results at `Test & Score` widget. The evaluation results using 10-fold stratified cross validation for the given workflow are:
@@ -172,8 +173,8 @@ When training and evaluation process are finished, is possible to chech the resu
 |----------------|-------|-------|-------|-----------|--------|
 | Neural Network | 0.982 | 0.917 | 0.917 | 0.917 | 0.917 |
 
-
 Confusion matrix:
+
 ![confusion matrix](readme-images/confusion-matrix.png)
 
 
