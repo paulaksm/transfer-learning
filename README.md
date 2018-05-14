@@ -4,15 +4,23 @@ Transfer Learning - Image Embeddings Generator is a simple script that takes adv
 
 ### Motivation
 
-When dealing with images, no matter how simple the project is, their naive vector representation (width * height * channels) can take an order of magnitude of tens of thousands of features, each! And despite the required memory space, are all the pixels in an image relevant for a classification task? - No!
+When dealing with images, no matter how simple the project is, their naive vector representation (width * height * channels) can take an order of magnitude of tens of thousands of features, each! And despite the amount of memory space required, are all the pixels in an image relevant for a classification task? - No!
 
 Transfer Learning for images, more specific Transferring Knowledge of Feature Representations, takes an image and do a forward pass in a CNN trained on another domain for a different task, and returns a low-dimensional representation of the given image. This new representation is expected to be a more significant and smaller vector of the input given that is the result of applying a sequence of pre-learned kernels.
 
-The main goal of this repository is to provide different image embeddings for a quick evaluation of machine learning algorithms trained on different representations of the input data.
+___The main goal of this repository is to provide different image embeddings for a quick evaluation of machine learning algorithms trained on different representations of the input data.___
 
 ### Available pre-trained CNNs
 
-<Add table:>
+| Model | Size | Feature vector size | Default input size | Minimum input size |
+|:-----------------:|:------:|:-------------------:|:------------------:|:------------------:|
+| Xception | 88 MB | (1, 2048) | (299, 299, 3) | (71, 71, 3) |
+| VGG16 | 528 MB | (1, 4096) | (224, 224, 3) | (48, 48, 3) |
+| VGG19 | 549 MB | (1, 4096) | (224, 224, 3) | (48, 48, 3) |
+| ResNet50 | 99 MB | (1, 2048) | (224, 224, 3) | (197, 197, 3) |
+| InceptionV3 | 92 MB | (1, 2048) | (299, 299, 3) | (139, 139, 3) |
+| InceptionResNetV2 | 215 MB | (1, 1536) | (299, 299, 3) | (139, 139, 3) |
+| MobileNet | 17 MB | (1, 1024) | (224, 224, 3) | (32, 32, 3) |
 
 ## Installation
 
@@ -22,6 +30,8 @@ Install all the requirements for Python 3 by running:
 `$ pip3 install -r requirements.txt`
 
 ## Usage
+
+This repository is quite simple to use, with one main script. `generate_embedding.py` is responsible for generating the image embeddings with its default configurations set to save the embeddings as two npy files (embeddings data and labels) and use the VGG16 model trained on ImageNet. 
 
 ```console
 $ cd transfer/
@@ -108,9 +118,66 @@ Add this flag followed by `None` to use the selected model architecture without 
 #### `-b`
 The size of batches to be passed to the model for feature extraction. Default is to preprocess image by image, doing a forward pass in the network and storing the resulting embedding in a list.
 
+__Attention__ when running the script for the first time using a specific `-tm` model, the selected model will be downloaded automatically in a hidden directory under the path specified by the environment variable `HOME`.
+
+### Creating a subdataset for testing
+
+Given two npy files containing image_data (`npy_data_file`) and labels (`<npy_labels_file>`), is possible to run the script `sample_toy_data.py` to sample and save a subset for testing/debugging purposes.
+
+```console
+$ cd transfer/toy_dataset/
+$ python sample_toy_data.py <npy_data_file> <npy_labels_file> -h
+
+usage: sample_toy_data.py [-h] [-s NUM_SAMPLES] [-n NAME_NPY]
+                          npy_data npy_labels
+
+Generate a toy dataset given an npy (data and labels) input files
+
+positional arguments:
+  npy_data              npy data file
+  npy_labels            npy label file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s NUM_SAMPLES, --num_samples NUM_SAMPLES
+                        number of samples (default=100)
+  -n NAME_NPY, --name_npy NAME_NPY
+                        name of new file (default=toy)
+```
+
 ## Usage example - Orange
 
-<Add código rodado no brucutu, prints do orange>
+One possible use of this repository is to preprocess large image datasets before passing them to visual programming machine learning tools such as [Orange](https://orange.biolab.si/).
+
+The following is a simple example using a dataset of 10.920 image instances of size 60x80x3, wherein the goal is to use these embeddings for training a shallow neural network in Orange canvas. 
+
+```console
+$ python generate_embedding.py -data alu_bal_60_80_3_data.npy -labels alu_bal_60_80_3_labels.npy -dir . -n mobilenet_alu_bal -he 60 -w 80 -tm MobileNet -to-csv
+
+Generating embeddings |################################| 10920/10920
+Data shape (10920, 1024), Labels shape (10920, 1)
+```
+
+After successfully running the script, `mobilenet_alu_bal.csv` file should be located at the current directory. 
+
+In Orange canvas is possible to load this file with `File` widget and build the following workflow:
+![orange workflow](readme-images/tl-workflow.png)
+
+After loading the data is mandatory to tell Orange which feature is the target, as follows:
+![dataset info](readme-images/dataset-info.png)
+
+When training and evaluation process are finished, is possible to chech the results at `Test & Score` widget. The evaluation results using 10-fold stratified cross validation for the given workflow are:
+
+| Method | AUC | CA | F1 | Precision | Recall |
+|----------------|-------|-------|-------|-----------|--------|
+| Neural Network | 0.982 | 0.917 | 0.917 | 0.917 | 0.917 |
+
+
+Confusion matrix:
+![confusion matrix](readme-images/confusion-matrix.png)
+
+
+__Important__ is interesting noticing that even though Orange Image Analytics add-on doesn't support MobileNet for image embedding is possible to train machine learning models on this data using this method.
 
 ## Built with 
 * Keras
@@ -134,3 +201,6 @@ Please make sure to update tests as appropriate.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## References
+[Keras pre-trained models](https://keras.io/applications/)
