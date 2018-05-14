@@ -113,7 +113,7 @@ def main():
                         '--save_folder_path',
                         type=str, 
                         default=os.getcwd(),
-                        help='path to csv files to be saved (default= current working directory)')
+                        help='path to files to be saved (default= current working directory)')
     parser.add_argument('-n',
                         '--save_name',
                         type=str, nargs='?', 

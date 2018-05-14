@@ -72,6 +72,42 @@ optional arguments:
                         as they are preprocessed (default=1)
 ```
 
+#### `-csv`
+Path to csv file containing the labels and image paths to be processed in the embeddings generator. The csv file has to be structured in the following way: first column: <img_labels>, second column: <path_to_images> 
+
+#### `-data`
+Path to npy file containing a vectorized representation of images to be processed in the embeddings generator. If this option is selected, one has also to provide a `-labels` npy file.
+
+#### `-labels`
+Path to npy file containing the labels of the vectorized images to be processed in the embeddings generator. If this option is selected, one has also to provide a `-data` npy file.
+
+#### `-dir`
+Path to directory where the generated embeddings will be saved. Default is the current working directory.
+
+#### `-n`
+Name for the new file(s). Default is transferfeature.
+
+#### `-tm`
+Selection of the trained model to be used. Only a single model must be chosen. Default is VGG16.
+
+#### `-to-csv`
+Save the generated embeddings in a csv file, with header row formated as follows: Class, n0, n1, ..., n<`number_of_embedded_features - 1`>. Default is to save the embeddings as two `npy` files, one for the embedded images and another one for their corresponding labels.
+
+#### `-he`
+Specify the original height of the vector image in `-data` npy file. Only required for npy input files. Default is 90.
+
+#### `-w`
+Specify the original width of the vector image in `-data` npy file. Only required for npy input files. Default is 160.
+
+#### `-c`
+Specify the original number of channels of the vector image in `-data` npy file. Only required for npy input files. Default is 3. __Attention__: only 3-channel images are accepted in the current configuration of the pre-trained models.
+
+#### `-weights`
+Add this flag followed by `None` to use the selected model architecture without its learned weights. Default is to use the learned weights in `imagenet`. 
+
+#### `-b`
+The size of batches to be passed to the model for feature extraction. Default is to preprocess image by image, doing a forward pass in the network and storing the resulting embedding in a list.
+
 ## Usage example - Orange
 
 <Add código rodado no brucutu, prints do orange>
